@@ -35,8 +35,9 @@ class SimpleASGI(object):
         self.router = router
         self.name = name
         self.request_class = request.Request
-        if access_logger is None:
-            self.setup_logger()
+        self.access_logger = (
+            access_logger if access_logger else self.setup_logger()
+        )
 
     def __call__(self, scope: dict):
         return connection.ASGIHTTPConnection(self, scope)
@@ -53,7 +54,7 @@ class SimpleASGI(object):
         )
         ch.setFormatter(formatter)
         root.addHandler(ch)
-        self.access_logger = root
+        return root
 
     async def handle_request(self, request):
         status_code = 200
